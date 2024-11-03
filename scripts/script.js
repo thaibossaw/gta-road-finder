@@ -223,6 +223,39 @@ const roadData = {
     ]
 };
 
+const markers = [
+    {
+        label: 'Cat Cafe',
+        coords: [-1033.8222001807103, -578.1483188940853],
+        icon: 'cat-cafe.png'
+    },
+    {
+        label: 'Construction',
+        coords: [-339.7476566333713, 98.63658301158316],
+        icon: 'construction.png'
+    },
+    {
+        label: 'Red Garage',
+        coords: [-755.4251453102149, -340.2509652509651],
+        icon: 'red-garage.png'
+    },
+    {
+        label: 'Rockford Plaza',
+        coords: [-288.5026235427237, -197.47422928975803],
+        icon: 'shopping.png'
+    },
+    {
+        label: 'Union Depository',
+        coords: [-683.2382641608164, -18.500582131639735],
+        icon: 'repository.png'
+    },
+    {
+        label: 'Fred\'s Pizza',
+        coords: [-728.9997638751959, 804.4763513513516],
+        icon: 'freds.png'
+    }
+]
+
 // Sort the features by the 'id' property
 roadData.features.sort((a, b) => {
     const nameA = a.properties.id.toUpperCase(); // Ignore case
@@ -414,6 +447,14 @@ mymap.on(L.Draw.Event.CREATED, function (event) {
     copyToClipboard(JSON.stringify(newRoadGeoJSON));
 });
 
+// Add an event listener for map clicks
+mymap.on('click', function (e) {
+    // Get the coordinates of the click event
+    var coords = e.latlng;
+    // Log the latitude and longitude to the console
+    console.log("[" + coords.lat + ", " + coords.lng + ']');
+});
+
 var layersControl = L.control.layers({ "Satelite": SateliteStyle, "Atlas": AtlasStyle }).addTo(mymap);
 
 function customIcon(icon) {
@@ -469,6 +510,30 @@ function highlightRoad(roadName) {
     // Change style to highlight
     layer.setStyle({ color: "red", weight: 6, opacity: 1 });
 }
+
+// Custom function to create a Leaflet icon from a given filename
+function createCustomIcon(iconFilename) {
+    return L.icon({
+        iconUrl: `./icons/${iconFilename}`, // Path to the icon
+        iconSize: [25, 25],                 // Size of the icon
+        iconAnchor: [12.5, 12.5],           // Point of the icon that corresponds to marker's location
+        popupAnchor: [0, -10]               // Point where the popup will open relative to the iconAnchor
+    });
+}
+
+// Add each marker to the map with its custom icon and label
+markers.forEach(markerData => {
+    const marker = L.marker(markerData.coords, {
+        icon: createCustomIcon(markerData.icon)
+    }).addTo(mymap);
+
+    // Bind a popup with the label and log the coordinates when clicked
+    marker.bindPopup(markerData.label);
+    marker.on('click', function () {
+        console.log(`Clicked marker at coordinates: [${markerData.coords[0]}, ${markerData.coords[1]}]`);
+    });
+});
+
 
 // Add roads and list items
 addRoads(roadData);
