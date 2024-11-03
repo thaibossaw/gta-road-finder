@@ -253,6 +253,25 @@ const markers = [
         label: 'Fred\'s Pizza',
         coords: [-728.9997638751959, 804.4763513513516],
         icon: 'freds.png'
+    },
+    {
+        label: 'Purple Dinosaur',
+        coords: [2648.9957875294194, 2541.928088803089],
+        icon: 'dino.png'
+    },
+    {
+        label: 'Triple Garage',
+        coords: [-422.5516431749353, -1388.4531853281853],
+        icon: 'triple-garage.png'
+    },
+    {
+        label: 'White Garage',
+        coords: [-756.8220240936429, -456.3827220077219],
+        icon: 'white-garage.png'
+    }, {
+        label: 'Rainbow Garage',
+        coords: [-637.5530329835425, -1202.9440154440153],
+        icon: 'rainbow-garage.png'
     }
 ]
 
@@ -372,7 +391,7 @@ var mymap = L.map('map', {
 
 let roadsLayer = L.geoJSON(roadData, {
     style: function (feature) {
-        return { color: "red", weight: 4, opacity: Number(MAPPING_MODE) };
+        return { color: "red", weight: 20, opacity: Number(MAPPING_MODE), fillOpacity: .1 };
     }
 }).addTo(mymap);
 
@@ -473,7 +492,7 @@ let roadLayers = {};
 function addRoads(roadData) {
     L.geoJSON(roadData, {
         style: function (feature) {
-            return { color: "red", weight: 4, opacity: Number(MAPPING_MODE) };
+            return { color: "red", weight: 4, opacity: Number(MAPPING_MODE), fillOpacity: 0.2 };
         },
         onEachFeature: function (feature, layer) {
             const roadName = feature.properties.id;
@@ -508,7 +527,7 @@ function highlightRoad(roadName) {
     mymap.fitBounds(layer.getBounds());
 
     // Change style to highlight
-    layer.setStyle({ color: "red", weight: 6, opacity: 1 });
+    layer.setStyle({ color: "red", weight: 6, opacity: .4, fillOpacity: 0.2 });
 }
 
 // Custom function to create a Leaflet icon from a given filename
