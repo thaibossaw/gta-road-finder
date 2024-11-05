@@ -340,7 +340,7 @@ function highlightRoad(roadName) {
     mymap.fitBounds(layer.getBounds());
 
     // Change style to highlight
-    layer.setStyle({ color: "red", weight: 6, opacity: 0 });
+    layer.setStyle({ color: "red", weight: 4, opacity: 0 });
 
     // Reset style after 5 seconds
     setTimeout(() => {
@@ -389,9 +389,18 @@ var mymap = L.map('map', {
     center: [0, 0]
 });
 
+const curvedRoadData = roadData.features.map((r) => {
+    const coords = r.geometry.coordinates;
+    const lineString = turf.lineString(coords);
+    const curved = turf.bezierSpline(lineString);
+    curved.properties = r.properties;
+    return curved;
+})
+roadData.features = curvedRoadData;
+console.log(roadData);
 let roadsLayer = L.geoJSON(roadData, {
     style: function (feature) {
-        return { color: "red", weight: 20, opacity: Number(MAPPING_MODE), fillOpacity: .1 };
+        return { color: "red", weight: 4, opacity: Number(MAPPING_MODE), fillOpacity: .1 };
     }
 }).addTo(mymap);
 

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-   <title>GTA V MAP</title>
+   <title>GTA V Road Finder</title>
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico">
@@ -14,6 +14,7 @@
       crossorigin=""></script>
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
    <style>
       body {
          display: flex;
@@ -24,6 +25,7 @@
       #map {
          width: 80%;
          height: 100vh;
+         background-color: #11a6d1;
       }
 
       #sidebar {
@@ -36,11 +38,17 @@
          box-sizing: border-box;
       }
 
+      /* Make alphabet buttons sticky at the top */
       #alphabetButtons {
          display: flex;
          flex-wrap: wrap;
          gap: 5px;
          margin-bottom: 10px;
+         position: sticky;
+         top: 0;
+         background-color: #f9f9f9;
+         padding: 5px;
+         z-index: 1;
       }
 
       #alphabetButtons button {
@@ -65,10 +73,13 @@
          margin-top: 0;
       }
 
+      /* Allow the list to scroll */
       ul {
          list-style: none;
          padding: 0;
          margin: 0;
+         overflow-y: auto;
+         max-height: calc(100vh - 80px); /* Adjust height for scrolling */
       }
 
       ul li {
@@ -83,12 +94,16 @@
    </style>
 </head>
 
-<body>
+<body style="background-color: 0fa8d2;">
    <div id="map"></div>
 
    <div id="sidebar">
-      <div id="alphabetButtons"></div>
-      <ul id="roadNamesList"></ul>
+      <div id="alphabetButtons">
+         <!-- Alphabet buttons will be inserted here -->
+      </div>
+      <ul id="roadNamesList">
+         <!-- Road names will be listed here -->
+      </ul>
    </div>
 
    <script src="scripts/script.js"></script>
