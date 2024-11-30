@@ -20,18 +20,39 @@
          display: flex;
          margin: 0;
          font-family: Arial, sans-serif;
+         flex-direction: row;
+      }
+
+      #tips {
+         width: 50%;
+         height: 100%;
+
+      }
+
+      #tips>img {
+         width: 100%;
+         height: 100%;
+      }
+
+      #map-container {
+         width: 50%;
       }
 
       #map {
-         width: 80%;
-         height: 100vh;
+         height: 80vh;
          background-color: #11a6d1;
       }
 
+      #logs {
+         width: 100%;
+         height: 18vh;
+      }
+
       #sidebar {
+         display: none;
          width: 20%;
          height: 100vh;
-         display: flex;
+         /* display: flex; */
          flex-direction: column;
          overflow-y: auto;
          padding: 10px;
@@ -79,7 +100,8 @@
          padding: 0;
          margin: 0;
          overflow-y: auto;
-         max-height: calc(100vh - 80px); /* Adjust height for scrolling */
+         max-height: calc(100vh - 80px);
+         /* Adjust height for scrolling */
       }
 
       ul li {
@@ -95,7 +117,17 @@
 </head>
 
 <body style="background-color: 0fa8d2;">
-   <div id="map"></div>
+   <div id="tips" style="text-align: center;">
+      <img src="lspd_easy.png" />
+      <img id="vehicle_image" src="vehicle_images/adder.jpg" style="max-width: 600px;"/>
+      <div>
+         <span id="vehicle_name">Adder</span>
+      </div>
+   </div>
+   <div id="map-container">
+      <div id="map"></div>
+      <textarea id="logs"></textarea>
+   </div>
 
    <div id="sidebar">
       <div id="alphabetButtons">

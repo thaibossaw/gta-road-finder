@@ -1,8 +1,22 @@
 const MAPPING_MODE = false
 
+const tunnelData = {
+    "type": "FeatureCollection",
+    "features": [
+        {"type": "Feature", "properties": {"id": "DelPerroTunnelEntranceRoute", "color": "green"}, "geometry": {"type": "LineString", "coordinates": [[-40.376891, -526.766774], [9.913147, -554.195174], [47.127827, -596.861574], [96.412124, -621.242374], [160.283962, -597.877379]]}},
+        { "type": "Feature", "properties": { "id": "AltaStreetTunnelExit" }, "geometry": { "type": "LineString", "coordinates": [[160.283962, -597.877379], [167.324602, -556.226877], [172.353578, -483.084477], [110.999664, -446.513277], [30.535587, -418.068979], [-90.16555, -426.703287], [-109.275806, -467.337984], [-135.426611, -570.956384], [-130.901002, -708.093662], [-173.144659, -832.029364], [-170.127255, -912.282861]] } },
+        {"type":"Feature","properties":{"id":"MirrorParkTunnelRoute"},"geometry":{"type":"LineString","coordinates":[[160.283962, -597.877379],[244.747354,-519.118852],[401.652365,-378.929252],[538.44138,-305.786853],[728.537836,-260.072853],[867.338423,-256.009355],[985.017182,-261.088657],[1030.278243,-264.136257]]}},
+        {"type":"Feature","properties":{"id":"LittleBighornTunnelRoute"},"geometry":{"type":"LineString","coordinates":[[160.283962, -597.877379],[207.499937,-597.978994],[291.987297,-631.502594],[406.648651,-707.692594],[474.037281,-863.120194],[521.310006,-1069.341096]]}},
+    ]
+
+
+    // [−597.877379,160.283962]
+}
+
 const roadData = {
     "type": "FeatureCollection",
     "features": [
+        { "type": "Feature", "properties": { "id": "Tunnels" }, "geometry": { "type": "LineString", "coordinates": [[160.283962, -597.877379], [160.283962, -597.877379]] } },
         { "type": "Feature", "properties": { "id": "Cascabel Avenue" }, "geometry": { "type": "LineString", "coordinates": [[-172.909595, 6518.191026], [-112.554014, 6457.215416]] } },
         { "type": "Feature", "properties": { "id": "Procopio Drive" }, "geometry": { "type": "LineString", "coordinates": [[149.992765, 6572.052784], [41.352719, 6673.678831], [22.240087, 6682.825172], [-22.020642, 6654.369903], [-73.322886, 6620.833271], [-101.488854, 6590.345466], [-142.731804, 6544.613759], [-176.933331, 6509.044684], [-197.051828, 6477.540588], [-233.265176, 6438.922733], [-264.448924, 6417.58127], [-315.751168, 6398.272296], [-361.017854, 6356.60566], [-394.213424, 6322.052784], [-414.331921, 6279.369857], [-413.32601, 6228.55688], [-381.136351, 6198.069075]] } },
         { "type": "Feature", "properties": { "id": "Duluoz Avenue" }, "geometry": { "type": "LineString", "coordinates": [[-366.047502, 6330.182927], [-221.19406, 6190.955223]] } },
@@ -225,6 +239,26 @@ const roadData = {
 
 const markers = [
     {
+        label: 'Del Perro Tunnel',
+        coords: [-518.8089399916862, -45.27825757947242],
+        icon: 'tunnel.png'
+    },
+    {
+        label: 'Mirror Park Tunnel',
+        coords: [-264.62558796663416, 1027.6097777672003],
+        icon: 'tunnel.png'
+    },
+    {
+        label: 'Little Bighorn Tunnel',
+        coords: [-1063.9630506561261, 521.6917094673281],
+        icon: 'tunnel.png'
+    },
+    {
+        label: 'Alta Street Tunnel',
+        coords: [-909.8924079964377, -167.53040465832143],
+        icon: 'tunnel.png'
+    },
+    {
         label: 'Cat Cafe',
         coords: [-1033.8222001807103, -578.1483188940853],
         icon: 'cat-cafe.png'
@@ -274,6 +308,72 @@ const markers = [
         icon: 'rainbow-garage.png'
     }
 ]
+
+// Initialize WebSocket connection
+const socket = new WebSocket('ws://localhost:8080');
+
+// WebSocket event listeners
+socket.onopen = function () {
+    addLogMessage('Websocket connection established', 'LOG')
+};
+
+socket.onmessage = function (event) {
+    const message = JSON.parse(event.data);
+    console.log(message);
+    switch (message.type) {
+        case 'match':
+            highlightRoad(message.data);
+            addLogMessage(`${message.data}`, 'MATCH');
+            break;
+        case 'log':
+            addLogMessage(`${message.data}`, 'LOG');
+            break;
+        case 'vehicle':
+            showVehicleImage(message.data)
+            break;
+    }
+};
+
+function showVehicleImage(message) {
+     // Get the image element by its ID
+     const imageElement = document.getElementById("vehicle_image");
+     // Set the new source for the image
+     imageElement.src = message.image;
+     const nameElement = document.getElementById("vehicle_name");
+     nameElement.innerHTML = message.name;
+}
+
+socket.onerror = function (error) {
+    addLogMessage(error, 'ERROR')
+    console.error('WebSocket error:', error);
+};
+
+socket.onclose = function () {
+    addLogMessage('Websocket connection closed', 'LOG')
+};
+
+// Function to send a message to the WebSocket server
+function sendWebSocketMessage(type, data) {
+    const message = JSON.stringify({ type, data });
+    socket.send(message);
+}
+
+function getCurrentTime() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+// Function to append a log entry to the textarea
+function addLogMessage(message, type) {
+    const logArea = document.getElementById('logs'); // Get the textarea
+    const timestamp = getCurrentTime(); // Get current time
+    const logEntry = `${timestamp} [${type}] ${message}`; // Format the log entry
+    logArea.value += logEntry + '\n'; // Append the log entry to the textarea
+    logArea.scrollTop = logArea.scrollHeight; // Scroll to the bottom of the textarea
+}
 
 // Sort the features by the 'id' property
 roadData.features.sort((a, b) => {
@@ -517,6 +617,12 @@ function addRoads(roadData) {
             document.getElementById("roadNamesList").appendChild(listItem);
         }
     }).addTo(mymap);
+
+    L.geoJSON(tunnelData, {
+        style: function (feature) {
+            return { color: feature.properties?.color || 'blue', weight: 2, opacity: 0.2, fillOpacity: 0.3 };
+        }
+    }).addTo(mymap);
 }
 
 let highlightedRoadLayer;
@@ -565,3 +671,83 @@ markers.forEach(markerData => {
 
 // Add roads and list items
 addRoads(roadData);
+
+
+let tunnelEditMode = false;
+let tunnelLayer = new L.FeatureGroup(); // Layer to hold tunnel features
+mymap.addLayer(tunnelLayer); // Add the tunnel layer to the map
+
+// Update Draw Control with tunnels in blue
+const tunnelDrawControl = new L.Control.Draw({
+    draw: {
+        polyline: {
+            shapeOptions: {
+                color: 'blue', // Blue for tunnels
+                weight: 3
+            }
+        },
+        polygon: false,  // Disable polygon tool
+        rectangle: false, // Disable rectangle tool
+        circle: false,    // Disable circle tool
+        marker: false     // Disable marker tool
+    },
+    edit: {
+        featureGroup: tunnelLayer // Specify the tunnel layer for editing
+    }
+});
+
+// // Function to toggle Tunnel edit mode
+// function toggleTunnelEditMode() {
+//     tunnelEditMode = !tunnelEditMode;
+//     if (tunnelEditMode) {
+//         mymap.addControl(tunnelDrawControl); // Add the tunnel draw controls
+//         alert("Tunnel edit mode activated. You can now draw and edit tunnels.");
+//     } else {
+//         mymap.removeControl(tunnelDrawControl); // Remove the tunnel draw controls
+//         alert("Tunnel edit mode deactivated.");
+//     }
+// }
+
+// // Add a button to toggle Tunnel edit mode
+// const tunnelEditButton = L.control({ position: 'topright' });
+// tunnelEditButton.onAdd = function () {
+//     const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+//     div.innerHTML = '<button style="background-color:blue; color:white; padding:5px; border:none; border-radius:3px; cursor:pointer;">Toggle Tunnel Edit Mode</button>';
+//     div.onclick = toggleTunnelEditMode;
+//     return div;
+// };
+// tunnelEditButton.addTo(mymap);
+
+// Event listener for creating tunnel lines
+mymap.on(L.Draw.Event.CREATED, function (event) {
+    if (tunnelEditMode) {
+        const layer = event.layer;
+        tunnelLayer.addLayer(layer); // Add the new tunnel to the tunnel layer
+
+        // Prompt the user to enter a name for the tunnel
+        const tunnelName = window.prompt("Enter a name for this tunnel:");
+        if (!tunnelName) {
+            alert("Tunnel name is required.");
+            return;
+        }
+
+        // Convert the drawn layer to GeoJSON format
+        const newTunnelGeoJSON = layer.toGeoJSON();
+        newTunnelGeoJSON.properties.id = tunnelName; // Add the tunnel name to the properties
+
+        // Copy the new GeoJSON feature to the clipboard
+        copyToClipboard(JSON.stringify(newTunnelGeoJSON));
+
+        // Add the tunnel dynamically to the tunnel list
+        const tunnelListItem = document.createElement("li");
+        tunnelListItem.textContent = tunnelName;
+        tunnelListItem.style.cursor = "pointer";
+        tunnelListItem.onclick = function () {
+            // Zoom to the tunnel when clicked
+            mymap.fitBounds(layer.getBounds());
+        };
+        document.getElementById("roadNamesList").appendChild(tunnelListItem);
+
+        alert("Tunnel created and copied to clipboard!");
+    }
+});
